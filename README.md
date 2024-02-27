@@ -1,29 +1,32 @@
-Form-extracter is a MERN Web Application that extracts selected pages from a PDF.
+<h1>Form-extracter is a MERN Web Application that extracts selected pages from a PDF.</h1>
 
-Prerequisites:
--- NPM has to be installed.
--- NodeJs has to be installed.
--- MongoDB has to be installed.
+![Screenshot 2024-02-27 150246](https://github.com/ashrayachu/form-extracter/assets/144986367/7512ec5a-0a7e-40f2-bcd2-17e091063207)
 
-Frontend Dependencies:
-  tailwind css
-  react-router-dom
-  react-pdf
 
-Backend Dependencies:
-  Express
-  Cors
-  multer
-  mongoose
-  pdf-lib
+Prerequisites:<br/>
+-- NPM has to be installed.<br/>
+-- NodeJs has to be installed.<br/>
+-- MongoDB has to be installed.<br/>
+
+Frontend Dependencies:<br/>
+  tailwind css<br/>
+  react-router-dom<br/>
+  react-pdf<br/>
+
+Backend Dependencies:<br/>
+  Express<br/>
+  Cors<br/>
+  multer <br/>
+  mongoose <br/>
+  pdf-lib <br/>
   
-To run the react application,
-     open command prompt in vscode.
-     goto client directory
-     npm run dev
+To run the react application,<br/>
+     open command prompt in vscode.<br/>
+     goto client directory <br/>
+     npm run dev<br/>
      
-To run the express application,
-     cd api
-     node index.js
+To run the express application, <br/>
+     cd api <br/>
+     node index.js <br/>
 
 Open web browser and paste the localhost link of react application. Your can access the form-extracter page now.
