@@ -8,6 +8,9 @@ const {PDFDocument} = require('pdf-lib');
 
 
 const PDF = require('./models/Pdf');
+const EPDF = require('./models/ExtractedPdf');
+const ExtractedPdf = require('./models/ExtractedPdf');
+
 
 const fs = require('fs').promises;
 
@@ -17,6 +20,7 @@ app.use(bodyParser.json());
 
 
 app.use('/uploads', express.static(__dirname + '/uploads'))
+app.use('/mergedPdf', express.static(__dirname + '/mergedPdf'))
 app.use('/splitpdfs', express.static(__dirname + '/splitpdfs'))
 
 
@@ -35,7 +39,7 @@ const storage = multer.diskStorage({
   const upload = multer({ storage: storage })
 
 app.post('/post', upload.single('file'), async(req, res)=>{
-  const {path} = req.file
+ const {path} = req.file
   console.log(path)
   try{
     const data = await PDF.create({ path })
@@ -81,45 +85,46 @@ app.post('/post/:id',async (req,res)=>{
    }
 })
 
-app.post('/pages',upload.single(pdfUrls),async(req, res)=>{
-  const {pdfUrls} = req.body;
-  console.log('Type of pdfUrls:', typeof pdfUrls);
-  try {
-    // Create a new PDF document
-    const mergedPdf = await PDFDocument.create();
-    
-    // Iterate through each PDF URL
-    for (const pdfUrl of pdfUrls) {
-      // Fetch the PDF data from the URL (you may need to use a library like Axios for this)
-      // For demonstration purposes, I'm assuming you already have the PDF data
-      const pdfBytes = await fetchPdfFromUrl(pdfUrl);
+app.post('/pages',async(req, res)=>{
+const pdfUrls  = req.body;
 
-      // Load the fetched PDF data
-      const pdfDoc = await PDFDocument.load(pdfBytes);
 
-      // Iterate through each page of the PDF and copy it to the merged PDF
-      for (const [pageIndex, pdfPage] of pdfDoc.getPages().entries()) {
-        const copiedPage = await mergedPdf.copyPages(pdfDoc, [pageIndex]);
+try{
+  const mergedPdf = await PDFDocument.create();
+      for(const pdfUrl of pdfUrls){
+        const splitUrl =  pdfUrl.split('/')
+        urlPath = splitUrl[4]
+        // console.log(urlPath)
+        const fileBytes =await fs.readFile(`splitpdfs/${urlPath}`)
+         const pdfBytes = await PDFDocument.load(fileBytes)
+        //  console.log(pdfBytes)
+        const copiedPage = await mergedPdf.copyPages(pdfBytes,[0]);
         mergedPdf.addPage(copiedPage[0]);
       }
-    }
+      const mergedPdfBytes = await mergedPdf.save()
+      const fileName = `mergedPdf${Date.now()}.pdf`;
+      const filePath = `./mergedPdf/${fileName}`;
+      await fs.writeFile(filePath, mergedPdfBytes);
+      const fileUrl = `http://localhost:3000/mergedPdf/${fileName}`;
+      // res.json(fileUrl)
+      try{
+         const EPDFDoc = await EPDF.create({ExtractedPdfUrl: fileUrl})
+         res.json( {id: EPDFDoc._id})
+      }
+      catch(e){
+        res.status(500).json("Could not create database collection of extracted url")
+      }
 
-    // Serialize the merged PDF
-    const mergedPdfBytes = await mergedPdf.save();
-    const fileName = `${Date.now()}_merge.pdf`;
-    const filePath = `./mergepdf/${fileName}`;
-    await fs.writeFile(filePath, mergedPdfBytes);
-    
-    const outputFile = 'merged_pdf.pdf';
-    console.log(outputFile)
+  }
+catch(e){
+  res.status(500).json("Could not merge document") 
+}
+})
 
-    
-   
-  }
-   catch (error) {
-    console.error('Error combining PDFs:', error);
-    res.status(500).json({ error: 'An error occurred while combining PDFs.' });
-  }
+app.post('/downloadform/:id',async(req, res)=>{
+  const {id} =  req.params
+  const mergedPdfDoc =  await EPDF.findById(id)
+  res.json(mergedPdfDoc)
 })
 
 

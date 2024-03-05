@@ -1,7 +1,7 @@
 
 
 import {useEffect, useState} from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, Navigate } from 'react-router-dom'
 import { Document, Page } from 'react-pdf';
 
 import { pdfjs } from 'react-pdf';
@@ -14,7 +14,11 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/b
 function ExtractedForm() {
   const {id} = useParams()
   const [path, setPath] = useState('')
+  const [redirect, setRedirect] = useState(false);
+
   const [selectedPages, setSelectedPages] = useState([]);
+  const [extractedId, setExtractedId] = useState('');
+
  
   useEffect(() => {
     fetch(`http://localhost:3000/post/${id}`, {
@@ -39,17 +43,30 @@ function ExtractedForm() {
       }
     });
   };
-  function handleExtract (){
-    const requestBody = { selectedPages };
-    const response = fetch('http://localhost:3000/pages',{
+  async function handleExtract(e){
+    e.preventDefault()  
+    if(selectedPages.length === 0){
+      alert("Select the pages")
+    }
+    const response = await fetch('http://localhost:3000/pages',{
       method: 'POST',
-      headers: {
-              'Content-Type': 'application/json'
-               },
-       body: JSON.stringify(requestBody)  
+      headers:{'Content-Type':'application/json'},
+       body: JSON.stringify(selectedPages),
     })
+    
+
+    if(response.status === 200){
+     const result = await response.json()
+     setExtractedId(result.id)
+      setRedirect(true)
+    }
+    else{
+      alert("Couldn't merge docs")
+    }
   }
- 
+ if(redirect){
+  return <Navigate to={`/downloadform/${extractedId}`}/>
+ }
   return (
     <div className='ExtractPage'>
        <h1 className='heading'>Select the pages to be extracted and click extract</h1>
@@ -68,12 +85,9 @@ function ExtractedForm() {
                 checked={selectedPages.some(selectedItem => selectedItem === item)}
                 onChange={() => handleCheckboxChange(item)} />
              </div>
-            </div>
-           
-           
+            </div>     
     )))}
     </div>
-
 </div>
   )
 }

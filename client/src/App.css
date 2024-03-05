@@ -52,3 +52,39 @@ body{
 .input-label{
   @apply w-full flex justify-around bg-green-200 
 }
+
+/*___________________download page_____________________________*/
+
+.Download-section{
+@apply w-full  flex flex-col items-center
+
+}
+.Download-div{
+  @apply w-full  mt-11 flex flex-col items-center gap-10 md:w-1/2
+}
+
+.Download-nav{
+ @apply w-1/2 flex flex-col items-center gap-2 p-5
+}
+
+.nav-button{
+  @apply w-full flex gap-2
+}
+
+.Pdf-pageNum{
+  @apply text-gray-700 font-semibold
+}
+.file-container{
+  @apply w-full flex flex-col items-center
+}
+.download-btn{
+  padding: 20px 50px;  
+  width:50%;
+  height: 12%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius:50px;
+  @apply bg-red-800 text-red-200 mb-10 hover:bg-red-500
+}
+
